@@ -1,0 +1,11 @@
+{
+  "itemGroup.solid_displays": "Solid Displays",
+  "block.solid_displays.design_table": "Tasarım Masası",
+  "item.solid_displays.empty_blueprint": "Boş Blueprint",
+  "item.solid_displays.blueprint": "Blueprint",
+  "item.solid_displays.blueprint.named": "Blueprint: %s",
+  "container.solid_displays.design_table": "Tasarım Masası",
+  "gui.solid_displays.design_table.placeholder": "Buraya bir blueprint koy",
+  "tooltip.solid_displays.blueprint.no_design": "Henüz tasarım yok. Tasarım Masası'nda doldur.",
+  "tooltip.solid_displays.blueprint.parts": "Parça sayısı: %s"
+}
