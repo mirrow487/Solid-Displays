@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "G": "minecraft:glass_pane",
+    "P": "minecraft:paper",
+    "C": "minecraft:crafting_table",
+    "#": "#minecraft:planks"
+  },
+  "pattern": [
+    "GPG",
+    "#C#",
+    "# #"
+  ],
+  "result": {
+    "id": "solid_displays:design_table"
+  }
+}
