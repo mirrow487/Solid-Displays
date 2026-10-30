@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "solid_displays",
+	"version": "${version}",
+	"name": "Solid Displays",
+	"description": "Design block/item display models at a Design Table in survival, save them to blueprints and place them with real collision.",
+	"authors": [
+		"mirrow487"
+	],
+	"contact": {
+		"sources": "https://github.com/mirrow487/Solid-Displays"
+	},
+	"license": "MIT",
+	"icon": "assets/solid_displays/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.soliddisplays.SolidDisplays"
+		],
+		"client": [
+			"com.soliddisplays.client.SolidDisplaysClient"
+		]
+	},
+	"depends": {
+		"fabricloader": ">=0.20.1",
+		"minecraft": "~26.3",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

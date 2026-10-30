@@ -1,0 +1,11 @@
+{
+  "itemGroup.solid_displays": "Solid Displays",
+  "block.solid_displays.design_table": "Design Table",
+  "item.solid_displays.empty_blueprint": "Empty Blueprint",
+  "item.solid_displays.blueprint": "Blueprint",
+  "item.solid_displays.blueprint.named": "Blueprint: %s",
+  "container.solid_displays.design_table": "Design Table",
+  "gui.solid_displays.design_table.placeholder": "Put a blueprint here",
+  "tooltip.solid_displays.blueprint.no_design": "No design yet. Fill it at a Design Table.",
+  "tooltip.solid_displays.blueprint.parts": "Parts: %s"
+}
