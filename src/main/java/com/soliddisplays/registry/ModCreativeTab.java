@@ -17,6 +17,7 @@ public final class ModCreativeTab {
 					.displayItems((params, output) -> {
 						output.accept(ModItems.DESIGN_TABLE);
 						output.accept(ModItems.EMPTY_BLUEPRINT);
+						output.accept(ModItems.TEST_MODEL);
 					})
 					.build());
 

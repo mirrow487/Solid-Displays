@@ -5,6 +5,10 @@ import com.soliddisplays.registry.ModBlockEntities;
 import com.soliddisplays.registry.ModBlocks;
 import com.soliddisplays.registry.ModComponents;
 import com.soliddisplays.registry.ModCreativeTab;
+import com.soliddisplays.registry.ModEntities;
+import com.soliddisplays.placement.ModelPlacer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import com.soliddisplays.registry.ModItems;
 import com.soliddisplays.registry.ModMenus;
 import net.fabricmc.api.ModInitializer;
@@ -31,7 +35,12 @@ public class SolidDisplays implements ModInitializer {
 		ModBlockEntities.init();
 		ModItems.init();
 		ModMenus.init();
+		ModEntities.init();
 		ModCreativeTab.init();
+
+		// Delete parts of models that were dismantled while their chunk was unloaded.
+		ServerEntityEvents.ENTITY_LOAD.register(ModelPlacer::onEntityLoad);
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> ModelPlacer.onPlayerLeave(handler.getPlayer()));
 
 		LOGGER.info("Solid Displays initialised");
 	}
