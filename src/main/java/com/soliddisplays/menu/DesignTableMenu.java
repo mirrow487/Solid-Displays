@@ -1,6 +1,9 @@
 package com.soliddisplays.menu;
 
 import com.soliddisplays.block.DesignTableBlockEntity;
+import com.soliddisplays.model.ModelData;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import com.soliddisplays.registry.ModBlocks;
 import com.soliddisplays.registry.ModItems;
 import com.soliddisplays.registry.ModMenus;
@@ -29,25 +32,44 @@ public class DesignTableMenu extends AbstractContainerMenu {
 	private final ContainerLevelAccess access;
 	private final BlockPos tablePos;
 
+	/**
+	 * Data sent to the client when the screen opens: which table, and the
+	 * draft it holds so editing continues where it stopped.
+	 */
+	public record OpenData(BlockPos pos, ModelData draft) {
+		public static final StreamCodec<RegistryFriendlyByteBuf, OpenData> STREAM_CODEC = StreamCodec.composite(
+				BlockPos.STREAM_CODEC, OpenData::pos,
+				ModelData.STREAM_CODEC, OpenData::draft,
+				OpenData::new);
+	}
+
+	private final ModelData initialDraft;
+	/**
+	 * Client only: the designer hides the inventory while another tab is
+	 * shown. Hidden slots are neither drawn nor clickable.
+	 */
+	private boolean slotsVisible = true;
+
 	/** Client constructor (opened via {@link ModMenus#DESIGN_TABLE}). */
-	public DesignTableMenu(int syncId, Inventory inventory, BlockPos pos) {
-		this(syncId, inventory, new SimpleContainer(1), ContainerLevelAccess.NULL, pos);
+	public DesignTableMenu(int syncId, Inventory inventory, OpenData data) {
+		this(syncId, inventory, new SimpleContainer(1), ContainerLevelAccess.NULL, data.pos(), data.draft());
 	}
 
 	/** Server constructor. */
 	public DesignTableMenu(int syncId, Inventory inventory, DesignTableBlockEntity table) {
 		this(syncId, inventory, table.getBlueprintSlot(),
-				ContainerLevelAccess.create(table.getLevel(), table.getBlockPos()), table.getBlockPos());
+				ContainerLevelAccess.create(table.getLevel(), table.getBlockPos()), table.getBlockPos(), table.getDraft());
 	}
 
 	private DesignTableMenu(int syncId, Inventory inventory, Container blueprintContainer,
-			ContainerLevelAccess access, BlockPos pos) {
+			ContainerLevelAccess access, BlockPos pos, ModelData draft) {
 		super(ModMenus.DESIGN_TABLE, syncId);
 		this.blueprintContainer = blueprintContainer;
 		this.access = access;
 		this.tablePos = pos;
+		this.initialDraft = draft;
 
-		addSlot(new Slot(blueprintContainer, 0, SLOT_X, SLOT_Y) {
+		addSlot(new ToggleSlot(blueprintContainer, 0, SLOT_X, SLOT_Y) {
 			@Override
 			public boolean mayPlace(ItemStack stack) {
 				return isBlueprint(stack);
@@ -58,7 +80,39 @@ public class DesignTableMenu extends AbstractContainerMenu {
 				return 1;
 			}
 		});
-		addStandardInventorySlots(inventory, 8, INVENTORY_Y);
+		// Same layout as addStandardInventorySlots, but with hideable slots.
+		for (int row = 0; row < 3; row++) {
+			for (int col = 0; col < 9; col++) {
+				addSlot(new ToggleSlot(inventory, col + row * 9 + 9, 8 + col * 18, INVENTORY_Y + row * 18));
+			}
+		}
+		for (int col = 0; col < 9; col++) {
+			addSlot(new ToggleSlot(inventory, col, 8 + col * 18, INVENTORY_Y + 58));
+		}
+	}
+
+	/** A slot that disappears while {@link #slotsVisible} is false. */
+	private class ToggleSlot extends Slot {
+		ToggleSlot(Container container, int index, int x, int y) {
+			super(container, index, x, y);
+		}
+
+		@Override
+		public boolean isActive() {
+			return slotsVisible;
+		}
+	}
+
+	public ModelData getInitialDraft() {
+		return initialDraft;
+	}
+
+	public void setSlotsVisible(boolean visible) {
+		this.slotsVisible = visible;
+	}
+
+	public boolean areSlotsVisible() {
+		return slotsVisible;
 	}
 
 	public static boolean isBlueprint(ItemStack stack) {

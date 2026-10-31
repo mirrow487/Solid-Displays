@@ -33,6 +33,16 @@ public final class SDConfig {
 	/** Elements must stay inside a cube of this half-width around the origin, in blocks. */
 	public float maxModelRadius = 16f;
 
+	// ---- Collision -----------------------------------------------------
+
+	/**
+	 * Grid size (blocks) used to approximate parts that are rotated by angles
+	 * other than 90°. Smaller = closer to the real shape but more collider entities.
+	 */
+	public double rotatedCollisionStep = 0.125;
+	/** Upper limit of collider boxes for one rotated part (the grid gets coarser to fit). */
+	public int maxCollidersPerRotatedPart = 32;
+
 	// ---- Placement -----------------------------------------------------
 
 	/** Maximum distance (blocks) between a player and the spot they place a model at. */
@@ -94,5 +104,7 @@ public final class SDConfig {
 		maxModelsPerPlayer = Math.max(0, maxModelsPerPlayer);
 		volumeMultiplier = Math.clamp(volumeMultiplier, 0.0, 64.0);
 		minPerBlockType = Math.clamp(minPerBlockType, 0, 64);
+		rotatedCollisionStep = Math.clamp(rotatedCollisionStep, 1.0 / 32.0, 1.0);
+		maxCollidersPerRotatedPart = Math.clamp(maxCollidersPerRotatedPart, 1, 256);
 	}
 }

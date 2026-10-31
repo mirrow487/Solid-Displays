@@ -22,7 +22,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * Stores the table's blueprint slot and the draft design being edited, so
  * closing the screen (or the server restarting) never loses work.
  */
-public class DesignTableBlockEntity extends BlockEntity implements ExtendedMenuProvider<BlockPos> {
+public class DesignTableBlockEntity extends BlockEntity implements ExtendedMenuProvider<DesignTableMenu.OpenData> {
 	/** Single slot that holds an empty or filled blueprint. */
 	private final SimpleContainer blueprintSlot = new SimpleContainer(1) {
 		@Override
@@ -88,7 +88,7 @@ public class DesignTableBlockEntity extends BlockEntity implements ExtendedMenuP
 	}
 
 	@Override
-	public BlockPos getScreenOpeningData(ServerPlayer player) {
-		return worldPosition;
+	public DesignTableMenu.OpenData getScreenOpeningData(ServerPlayer player) {
+		return new DesignTableMenu.OpenData(worldPosition, draft);
 	}
 }

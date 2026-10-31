@@ -2,7 +2,6 @@ package com.soliddisplays.item;
 
 import com.soliddisplays.model.TestModels;
 import com.soliddisplays.placement.ModelPlacer;
-import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -17,8 +16,9 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 
 /**
- * Creative-only debug tool: places {@link TestModels#DEMO} for free, facing the
- * way the player looks. Used to verify collision before the designer exists.
+ * Creative-tab debug tool: places {@link TestModels#DEMO} facing the way the
+ * player looks. In survival it costs materials (refunded on dismantle), in
+ * creative it is free. Used to verify placement before the designer exists.
  */
 public class TestModelItem extends Item {
 	public TestModelItem(Properties properties) {
@@ -33,7 +33,8 @@ public class TestModelItem extends Item {
 		BlockPos clicked = context.getClickedPos();
 		BlockPos anchor = level.getBlockState(clicked).canBeReplaced() ? clicked : clicked.relative(context.getClickedFace());
 		int quarterTurns = quarterTurnsFor(player);
-		ModelPlacer.PlaceResult result = ModelPlacer.place(level, player, TestModels.DEMO, anchor, quarterTurns, List.of());
+		// Survival: costs (and refunds) materials exactly like a blueprint will. Creative: free.
+		ModelPlacer.PlaceResult result = ModelPlacer.placeWithMaterials(level, player, TestModels.DEMO, anchor, quarterTurns);
 		if (result.model().isEmpty()) {
 			player.sendOverlayMessage(result.error().copy().withStyle(ChatFormatting.RED));
 			return InteractionResult.FAIL;
