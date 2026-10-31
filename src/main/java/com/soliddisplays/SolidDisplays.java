@@ -1,6 +1,7 @@
 package com.soliddisplays;
 
 import com.soliddisplays.config.SDConfig;
+import com.soliddisplays.network.ModNetworking;
 import com.soliddisplays.registry.ModBlockEntities;
 import com.soliddisplays.registry.ModBlocks;
 import com.soliddisplays.registry.ModComponents;
@@ -37,6 +38,7 @@ public class SolidDisplays implements ModInitializer {
 		ModMenus.init();
 		ModEntities.init();
 		ModCreativeTab.init();
+		ModNetworking.init();
 
 		// Delete parts of models that were dismantled while their chunk was unloaded.
 		ServerEntityEvents.ENTITY_LOAD.register(ModelPlacer::onEntityLoad);
