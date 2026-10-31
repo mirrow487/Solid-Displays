@@ -11,7 +11,7 @@
   "tooltip.solid_displays.test_model": "Sabit bir test modeli yerleştirir. Survival: malzeme harcar (sökünce geri düşer). Yaratıcı: bedava.",
   "entity.solid_displays.model_collider": "Model Parçası",
   "message.solid_displays.place.blocked": "Yol kapalı: bir oyuncu veya mob modelin içinde sıkışırdı.",
-  "message.solid_displays.dismantle.confirm": "Bu modeli sökmek için 3 saniye içinde tekrar Shift + sağ tık yap.",
+  "message.solid_displays.dismantle.confirm": "\"%s\" sökülsün mü? Onaylamak için 3 saniye içinde tekrar tıkla.",
   "message.solid_displays.dismantle.done": "Model söküldü.",
   "message.solid_displays.dismantle.not_owner": "Bu modeli sadece yerleştiren oyuncu (veya operatör) sökebilir.",
   "message.solid_displays.place.missing": "Eksik malzeme: %s",
@@ -66,5 +66,16 @@
   "message.solid_displays.save.empty": "Önce en az bir parça ekle",
   "message.solid_displays.save.no_blueprint": "Önce slota bir Boş Blueprint koy",
   "message.solid_displays.save.done": "Blueprint kaydedildi: %s",
-  "gui.solid_displays.rotation.quick": "%s ekseni etrafında 90° döndür"
+  "gui.solid_displays.rotation.quick": "%s ekseni etrafında 90° döndür",
+  "item.solid_displays.dismantle_tool": "Söküm Aleti",
+  "tooltip.solid_displays.dismantle_tool": "Yerleşmiş bir modele iki kez sağ tıkla: model sökülür, malzemeleri geri düşer.",
+  "tooltip.solid_displays.blueprint.rotation": "Döndürme: %s°",
+  "tooltip.solid_displays.blueprint.materials": "Malzemeler (sende olan):",
+  "tooltip.solid_displays.blueprint.free": "Yaratıcı mod: yerleştirme bedava",
+  "tooltip.solid_displays.blueprint.usage": "Yerleştirmek için bloğa sağ tık · döndürmek için %s veya Shift+tekerlek",
+  "key.solid_displays.rotate": "Blueprint'i döndür",
+  "key.category.solid_displays.main": "Solid Displays",
+  "message.solid_displays.place.too_far": "Modeli buraya yerleştirmek için çok uzaktasın.",
+  "message.solid_displays.place.limit": "En fazla model sayısına ulaştın (%s).",
+  "message.solid_displays.unnamed": "isimsiz model"
 }

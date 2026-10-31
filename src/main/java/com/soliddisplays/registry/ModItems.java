@@ -2,6 +2,7 @@ package com.soliddisplays.registry;
 
 import com.soliddisplays.SolidDisplays;
 import com.soliddisplays.item.BlueprintItem;
+import com.soliddisplays.item.DismantleToolItem;
 import com.soliddisplays.item.TestModelItem;
 import java.util.function.Function;
 import net.minecraft.core.Registry;
@@ -22,6 +23,10 @@ public final class ModItems {
 	/** Carries a {@link ModComponents#MODEL_DATA} design; reusable, so it does not stack. */
 	public static final Item BLUEPRINT = register("blueprint", BlueprintItem::new,
 			new Item.Properties().stacksTo(1).rarity(Rarity.UNCOMMON));
+
+	/** Right-click a model part to dismantle the model. */
+	public static final Item DISMANTLE_TOOL = register("dismantle_tool", DismantleToolItem::new,
+			new Item.Properties().stacksTo(1));
 
 	/** Creative-only debug item that places a fixed test model (no recipe). */
 	public static final Item TEST_MODEL = register("test_model", TestModelItem::new,

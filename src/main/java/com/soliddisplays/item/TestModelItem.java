@@ -1,6 +1,7 @@
 package com.soliddisplays.item;
 
 import com.soliddisplays.model.TestModels;
+import com.soliddisplays.placement.BlueprintPlacement;
 import com.soliddisplays.placement.ModelPlacer;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -31,7 +32,7 @@ public class TestModelItem extends Item {
 			return InteractionResult.SUCCESS;
 		}
 		BlockPos clicked = context.getClickedPos();
-		BlockPos anchor = level.getBlockState(clicked).canBeReplaced() ? clicked : clicked.relative(context.getClickedFace());
+		BlockPos anchor = BlueprintPlacement.anchorFor(level, clicked, context.getClickedFace());
 		int quarterTurns = quarterTurnsFor(player);
 		// Survival: costs (and refunds) materials exactly like a blueprint will. Creative: free.
 		ModelPlacer.PlaceResult result = ModelPlacer.placeWithMaterials(level, player, TestModels.DEMO, anchor, quarterTurns);

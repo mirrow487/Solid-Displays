@@ -194,6 +194,9 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			List<ItemStack> cost = MaterialCalculator.cost(TestModels.DEMO);
 			BlockPos d = anchor.offset(24, 0, 0);
 			server.runCommand("clear @a");
+			// Placement now requires being within reach (config maxPlaceDistance): stand next to the spot.
+			teleport(server, anchor, 22, 0, -4, 0f);
+			ctx.waitTicks(5);
 			server.runOnServer(s -> Materials.toStacks(cost).forEach(st -> player(s).getInventory().add(st)));
 			boolean placed = server.computeOnServer(s ->
 					ModelPlacer.placeWithMaterials(s.overworld(), player(s), TestModels.DEMO, d, 0).model().isPresent());
@@ -201,7 +204,7 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			boolean emptied = server.computeOnServer(s -> cost.stream().allMatch(c -> Materials.count(player(s).getInventory(), c.getItem()) == 0));
 			check(emptied, "materials were not taken from the inventory");
 			boolean refused = server.computeOnServer(s ->
-					ModelPlacer.placeWithMaterials(s.overworld(), player(s), TestModels.DEMO, d.offset(8, 0, 0), 0).model().isEmpty());
+					ModelPlacer.placeWithMaterials(s.overworld(), player(s), TestModels.DEMO, d.offset(0, 0, -6), 0).model().isEmpty());
 			check(refused, "placement without materials must be refused");
 			UUID modelD = server.computeOnServer(s -> PlacedModels.get(s.overworld()).all().stream()
 					.filter(m -> m.anchor().equals(d)).findFirst().orElseThrow().id());
