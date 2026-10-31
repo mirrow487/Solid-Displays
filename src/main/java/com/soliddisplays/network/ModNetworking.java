@@ -9,7 +9,10 @@ import com.soliddisplays.registry.ModComponents;
 import com.soliddisplays.registry.ModItems;
 import java.util.Optional;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import com.soliddisplays.config.SDConfig;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -34,6 +37,10 @@ public final class ModNetworking {
 		PayloadTypeRegistry.serverboundPlay().registerLarge(SaveBlueprintPayload.TYPE, SaveBlueprintPayload.CODEC, MAX_DESIGN_PACKET);
 		PayloadTypeRegistry.serverboundPlay().registerLarge(UpdateDraftPayload.TYPE, UpdateDraftPayload.CODEC, MAX_DESIGN_PACKET);
 		PayloadTypeRegistry.serverboundPlay().register(RotateBlueprintPayload.TYPE, RotateBlueprintPayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(ServerLimitsPayload.TYPE, ServerLimitsPayload.CODEC);
+
+		// Tell every joining player the server's limits (only if their client has the mod).
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sendLimits(handler.getPlayer()));
 
 		ServerPlayNetworking.registerGlobalReceiver(SaveBlueprintPayload.TYPE,
 				(payload, context) -> saveBlueprint(context.player(), payload.pos(), payload.model()));
@@ -46,6 +53,16 @@ public final class ModNetworking {
 				BlueprintPlacement.rotate(held, Integer.signum(payload.steps()));
 			}
 		});
+	}
+
+	public static void sendLimits(ServerPlayer player) {
+		if (ServerPlayNetworking.canSend(player, ServerLimitsPayload.TYPE)) {
+			ServerPlayNetworking.send(player, ServerLimitsPayload.of(SDConfig.get()));
+		}
+	}
+
+	public static void sendLimitsToAll(MinecraftServer server) {
+		server.getPlayerList().getPlayers().forEach(ModNetworking::sendLimits);
 	}
 
 	/** The table the player is currently using, if it is the one at {@code pos}. */

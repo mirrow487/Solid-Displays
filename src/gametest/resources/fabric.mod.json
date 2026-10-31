@@ -6,6 +6,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"fabric-client-gametest": [
+			"com.soliddisplays.gametest.PolishClientGameTest",
 			"com.soliddisplays.gametest.BlueprintClientGameTest",
 			"com.soliddisplays.gametest.DesignerClientGameTest",
 			"com.soliddisplays.gametest.CollisionClientGameTest"
