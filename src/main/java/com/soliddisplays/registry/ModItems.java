@@ -28,7 +28,10 @@ public final class ModItems {
 	public static final Item DISMANTLE_TOOL = register("dismantle_tool", DismantleToolItem::new,
 			new Item.Properties().stacksTo(1));
 
-	/** Creative-only debug item that places a fixed test model (no recipe). */
+	/**
+	 * Debug item that places a fixed test model (no recipe, not in the creative
+	 * tab; get it with /give @s solid_displays:test_model).
+	 */
 	public static final Item TEST_MODEL = register("test_model", TestModelItem::new,
 			new Item.Properties().stacksTo(1).rarity(Rarity.EPIC));
 

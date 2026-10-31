@@ -18,7 +18,6 @@ public final class ModCreativeTab {
 						output.accept(ModItems.DESIGN_TABLE);
 						output.accept(ModItems.EMPTY_BLUEPRINT);
 						output.accept(ModItems.DISMANTLE_TOOL);
-						output.accept(ModItems.TEST_MODEL);
 					})
 					.build());
 
