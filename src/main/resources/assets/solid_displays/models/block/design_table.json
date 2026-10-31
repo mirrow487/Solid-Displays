@@ -1,38 +1,12 @@
 {
-  "parent": "minecraft:block/block",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "particle": "minecraft:block/crafting_table_front",
-    "down": "minecraft:block/oak_planks",
-    "up": "minecraft:block/crafting_table_top",
-    "front": "minecraft:block/crafting_table_front",
-    "side": "minecraft:block/crafting_table_side",
-    "up_overlay": "solid_displays:block/design_table_top_overlay",
-    "front_overlay": "solid_displays:block/design_table_front_overlay",
-    "side_overlay": "solid_displays:block/design_table_side_overlay"
-  },
-  "elements": [
-    {
-      "from": [0, 0, 0],
-      "to": [16, 16, 16],
-      "faces": {
-        "down": {"uv": [0, 0, 16, 16], "texture": "#down", "cullface": "down"},
-        "up": {"uv": [0, 0, 16, 16], "texture": "#up", "cullface": "up"},
-        "north": {"uv": [0, 0, 16, 16], "texture": "#front", "cullface": "north"},
-        "west": {"uv": [0, 0, 16, 16], "texture": "#front", "cullface": "west"},
-        "south": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "south"},
-        "east": {"uv": [0, 0, 16, 16], "texture": "#side", "cullface": "east"}
-      }
-    },
-    {
-      "from": [-0.01, -0.01, -0.01],
-      "to": [16.01, 16.01, 16.01],
-      "faces": {
-        "up": {"uv": [0, 0, 16, 16], "texture": "#up_overlay", "cullface": "up"},
-        "north": {"uv": [0, 0, 16, 16], "texture": "#front_overlay", "cullface": "north"},
-        "west": {"uv": [0, 0, 16, 16], "texture": "#front_overlay", "cullface": "west"},
-        "south": {"uv": [0, 0, 16, 16], "texture": "#side_overlay", "cullface": "south"},
-        "east": {"uv": [0, 0, 16, 16], "texture": "#side_overlay", "cullface": "east"}
-      }
-    }
-  ]
+    "particle": "solid_displays:block/design_table_front",
+    "down": "solid_displays:block/design_table_bottom",
+    "up": "solid_displays:block/design_table_top",
+    "north": "solid_displays:block/design_table_front",
+    "west": "solid_displays:block/design_table_front",
+    "south": "solid_displays:block/design_table_side",
+    "east": "solid_displays:block/design_table_side"
+  }
 }
