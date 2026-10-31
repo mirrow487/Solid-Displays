@@ -76,29 +76,24 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 	private static final int POS_Y = 46;
 	private static final int ROW_STEP = 28;
 
-	// ---- colours: light "blueprint" theme (pale blues + yellow, few dark tones) ----
-	private static final int BG = 0xFFDDE7F3;
-	private static final int PANEL = 0xFFEEF3FA;
-	private static final int PANEL_LIGHT = 0xFFD3E2F3;
-	private static final int TOOLBAR = 0xFFFFEDB3;
-	private static final int WELL = 0xFFFAFCFF;
-	private static final int WELL_BORDER = 0xFFB5C8E0;
-	private static final int SLOT_BG = 0xFFA9BDD6;
-	/** The 3D view is blueprint blue; its grid lines are white. */
-	private static final int VIEW_BG = 0xFF3D73B8;
-	private static final int VIEW_TEXT = 0xFFEAF2FC;
-	private static final int TEXT = 0xFF1E3552;
-	private static final int TEXT_DIM = 0xFF5B7598;
-	/** Yellow for things drawn on the blue view (selection outline). */
+	// ---- colours: neutral dark grey editor theme ----
+	private static final int BG = 0xFF1B1D22;
+	private static final int PANEL = 0xFF25282F;
+	private static final int PANEL_LIGHT = 0xFF30343C;
+	private static final int TOOLBAR = PANEL_LIGHT;
+	private static final int WELL = 0xFF1F2227;
+	private static final int WELL_BORDER = 0xFF1F2227;
+	private static final int SLOT_BG = 0xFF1F2227;
+	private static final int VIEW_BG = 0xFF14161A;
+	private static final int VIEW_TEXT = 0xFF9AA0A6;
+	private static final int TEXT = 0xFFE6E6E6;
+	private static final int TEXT_DIM = 0xFF9AA0A6;
 	private static final int ACCENT = 0xFFFFD24A;
-	/** Darker amber for headings on the light panels (readable). */
-	private static final int ACCENT_TEXT = 0xFFB07600;
-	private static final int OK = 0xFF2E8B45;
-	private static final int ERROR = 0xFFD33A3F;
-	/** Gizmo colours: bright so they stand out on the blue view (X red, Y green, Z cyan). */
-	private static final int[] AXIS_COLORS = {0xFFFF5A5F, 0xFF5BE07A, 0xFF7FE3FF};
-	/** The same axes as darker tones for the X/Y/Z labels on the light panel. */
-	private static final int[] AXIS_LABEL_COLORS = {0xFFC62828, 0xFF2E7D32, 0xFF1565C0};
+	private static final int ACCENT_TEXT = ACCENT;
+	private static final int OK = 0xFF46A758;
+	private static final int ERROR = 0xFFE5484D;
+	private static final int[] AXIS_COLORS = {0xFFE5484D, 0xFF46A758, 0xFF3E8EE8};
+	private static final int[] AXIS_LABEL_COLORS = AXIS_COLORS;
 	private static final int HOVER = 0xFFFFFFFF;
 
 	private enum Tab { PART, SAVE }
@@ -565,7 +560,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 				int x = 4 + col * CELL;
 				int y = pickerY + row * CELL;
 				if (index == hovered) {
-					g.fill(x, y, x + CELL, y + CELL, 0x503D73B8);
+					g.fill(x, y, x + CELL, y + CELL, 0x40FFFFFF);
 				}
 				g.item(filtered.get(index).icon(), x + 1, y + 1);
 			}
@@ -596,9 +591,9 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 			ModelElement e = elements.get(index);
 			int y = listY0 + r * ROW_H;
 			if (index == state.selectedIndex()) {
-				g.fill(4, y, leftW - 4, y + ROW_H, 0x90FFD24A);
+				g.fill(4, y, leftW - 4, y + ROW_H, 0x60FFD24A);
 			} else if (index == hovered) {
-				g.fill(4, y, leftW - 4, y + ROW_H, 0x303D73B8);
+				g.fill(4, y, leftW - 4, y + ROW_H, 0x30FFFFFF);
 			}
 			ItemStack icon = iconOf(e);
 			g.item(icon, 5, y + 1);
@@ -606,7 +601,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 			g.text(font, font.plainSubstrByWidth(label, leftW - 40), 24, y + 5, TEXT, false);
 			// small square: filled = collision on
 			int cx = leftW - 12;
-			g.fill(cx, y + 6, cx + 6, y + 12, e.collision() ? OK : 0xFFB7C3D2);
+			g.fill(cx, y + 6, cx + 6, y + 12, e.collision() ? OK : 0xFF5A5F66);
 		}
 	}
 
@@ -653,7 +648,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 			int x = leftPos + slot.x;
 			int y = topPos + slot.y;
 			g.fill(x - 1, y - 1, x + 17, y + 17, SLOT_BG);
-			g.fill(x, y, x + 16, y + 16, 0xFFC9D8EA);
+			g.fill(x, y, x + 16, y + 16, 0xFF2C3037);
 		}
 		ItemStack bp = menu.getBlueprint();
 		Component slotHint = bp.isEmpty() ? Component.translatable("gui.solid_displays.slot.empty")

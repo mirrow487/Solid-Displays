@@ -130,5 +130,4 @@ LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1920x108
 
 ## License
 
-MIT. The Design Table's model reuses the vanilla crafting table textures by reference (they are not copied
-into the mod); only the overlays are included.
+MIT. All textures are original.
