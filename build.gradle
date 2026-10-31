@@ -24,6 +24,18 @@ loom {
 	}
 }
 
+fabricApi {
+	// Automated in-game tests (src/gametest). They are NOT part of the mod jar.
+	// Run with: ./gradlew runClientGameTest   (needs a display; see README)
+	configureTests {
+		createSourceSet = true
+		modId = "solid_displays_gametest"
+		enableGameTests = false
+		enableClientGameTests = true
+		eula = true
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"

@@ -1,0 +1,15 @@
+{
+	"schemaVersion": 1,
+	"id": "solid_displays_gametest",
+	"version": "1.0.0",
+	"name": "Solid Displays Game Tests",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-client-gametest": [
+			"com.soliddisplays.gametest.CollisionClientGameTest"
+		]
+	},
+	"depends": {
+		"solid_displays": "*"
+	}
+}
