@@ -1,7 +1,9 @@
 package com.soliddisplays.gametest;
 
 import com.soliddisplays.entity.ModelColliderEntity;
+import com.soliddisplays.model.MaterialCalculator;
 import com.soliddisplays.model.TestModels;
+import com.soliddisplays.placement.Materials;
 import com.soliddisplays.placement.ModelPlacer;
 import com.soliddisplays.placement.PlacedModel;
 import com.soliddisplays.placement.PlacedModels;
@@ -23,6 +25,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -31,7 +36,8 @@ import net.minecraft.world.phys.Vec3;
  * End-to-end collision test in a real client, using real player physics
  * (keyboard input, gravity, step-up), plus persistence and a dedicated server.
  * <p>
- * 10 elements -> 10 displays + 12 collider pieces (platform split in 2, pillar split in 2).
+ * 10 elements -> 10 displays + collider pieces (platform and pillar are split, the 45° block
+ * is approximated by several boxes).
  * Model-space layout of {@link TestModels#DEMO} (anchor = origin, no rotation):
  * platform x0..5 z0..3 h0.5, table top y1.375..1.5 over x0.5..2.5 z0.5..1.5,
  * pillar x4.25..4.75 z2.25..2.75 y0.5..4.5, poppy (no collision) x0.25..0.75 z2.25..2.75.
@@ -51,6 +57,8 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 		BlockPos anchor;
 		UUID modelA;
 		TestWorldSave save;
+		int pieces = ModelPlacer.colliderPieces(TestModels.DEMO, 0).size();
+		int perModel = 10 + pieces;
 		try (TestSingleplayerContext sp = ctx.worldBuilder().create()) {
 			save = sp.getWorldSave();
 			TestServerContext server = sp.getServer();
@@ -70,10 +78,12 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			// --- client and server must see exactly the same boxes
 			List<AABB> serverBoxes = server.computeOnServer(s -> colliderBoxes(s.overworld().getAllEntities()));
 			List<AABB> clientBoxes = ctx.computeOnClient(mc -> colliderBoxes(mc.level.entitiesForRendering()));
-			check(serverBoxes.size() == 12, "expected 12 collider pieces, got " + serverBoxes.size());
+			System.out.println("[SolidDisplays test] test model has " + pieces + " collider pieces");
+			check(pieces > 12, "rotated block should be approximated by several boxes");
+			check(serverBoxes.size() == pieces, "expected " + pieces + " collider pieces, got " + serverBoxes.size());
 			check(serverBoxes.equals(clientBoxes), "client boxes differ from server boxes\n" + serverBoxes + "\n" + clientBoxes);
 			int parts = server.computeOnServer(s -> countParts(s.overworld()));
-			check(parts == 22, "expected 10 displays + 12 colliders, got " + parts);
+			check(parts == perModel, "expected 10 displays + " + pieces + " colliders, got " + parts);
 
 			double base = anchor.getY();
 			// --- stand on the platform (middle, on a split seam, and overhanging an edge)
@@ -84,6 +94,15 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			standOn(ctx, server, anchor, 1.5, 1.0, base + 1.5, "table top");
 			// --- top of the 4-block pillar (upper split piece)
 			standOn(ctx, server, anchor, 4.5, 2.5, base + 4.5, "pillar top");
+
+			// --- 45° rotated block: follows the real shape, not the enclosing box.
+			// An item dropped in the empty corner of the enclosing box must fall past the
+			// block onto the platform; one dropped on the middle must stay on top.
+			double cornerY = dropItemAndGetY(ctx, server, anchor, 3.15, 0.15);
+			double middleY = dropItemAndGetY(ctx, server, anchor, 3.75, 0.75);
+			check(Math.abs(cornerY - (base + 0.5)) < 0.01, "item in the corner should land on the platform, y=" + cornerY);
+			check(Math.abs(middleY - (base + 1.5)) < 0.01, "item on the rotated block should rest on top, y=" + middleY);
+			System.out.println("[SolidDisplays test] OK rotated block: corner item fell to " + cornerY + ", middle item rests at " + middleY);
 
 			// --- walk north into the pillar: step up onto the platform, then stop at the pillar
 			teleport(server, anchor, 4.5, 0, 4.0, 180f);
@@ -132,7 +151,7 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			});
 			ctx.waitTicks(10);
 			int before = server.computeOnServer(s -> countParts(s.overworld()));
-			check(before == 66, "expected 3 models (66 entities) before reload, got " + before);
+			check(before == 3 * perModel, "expected 3 models before reload, got " + before + " entities");
 
 			// --- screenshot (debug hitbox lines do not render on the software renderer, so none here)
 			teleport(server, anchor, -3.5, 2.5, -3.5, -40f);
@@ -148,9 +167,9 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			sp.getConnection().waitForChunksRender();
 			ctx.waitTicks(20);
 			int after = server.computeOnServer(s -> countParts(s.overworld()));
-			check(after == 44, "after reload expected 2 models (44 entities), got " + after);
+			check(after == 2 * perModel, "after reload expected 2 models, got " + after + " entities");
 			int clientColliders = ctx.computeOnClient(mc -> colliderBoxes(mc.level.entitiesForRendering()).size());
-			check(clientColliders == 24, "after reload client sees " + clientColliders + " colliders, expected 24");
+			check(clientColliders == 2 * pieces, "after reload client sees " + clientColliders + " colliders");
 			standOn(ctx, server, anchor, 1.5, 1.0, anchor.getY() + 1.5, "table top after reload");
 			System.out.println("[SolidDisplays test] OK persistence + orphan cleanup");
 
@@ -158,13 +177,37 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 			UUID id = modelA;
 			server.runOnServer(s -> ModelPlacer.requestDismantle(s.overworld(), player(s), id));
 			int afterFirst = server.computeOnServer(s -> countParts(s.overworld()));
-			check(afterFirst == 44, "first click must only ask for confirmation");
+			check(afterFirst == 2 * perModel, "first click must only ask for confirmation");
 			server.runOnServer(s -> ModelPlacer.requestDismantle(s.overworld(), player(s), id));
 			ctx.waitTicks(10);
 			int afterSecond = server.computeOnServer(s -> countParts(s.overworld()));
 			int clientAfter = ctx.computeOnClient(mc -> colliderBoxes(mc.level.entitiesForRendering()).size());
-			check(afterSecond == 22 && clientAfter == 12, "dismantle left " + afterSecond + " / client " + clientAfter);
+			check(afterSecond == perModel && clientAfter == pieces, "dismantle left " + afterSecond + " / client " + clientAfter);
 			System.out.println("[SolidDisplays test] OK dismantle with confirmation");
+
+			// --- survival placement costs materials; dismantling drops exactly those back
+			List<ItemStack> cost = MaterialCalculator.cost(TestModels.DEMO);
+			BlockPos d = anchor.offset(24, 0, 0);
+			server.runCommand("clear @a");
+			server.runOnServer(s -> Materials.toStacks(cost).forEach(st -> player(s).getInventory().add(st)));
+			boolean placed = server.computeOnServer(s ->
+					ModelPlacer.placeWithMaterials(s.overworld(), player(s), TestModels.DEMO, d, 0).model().isPresent());
+			check(placed, "survival placement with materials failed");
+			boolean emptied = server.computeOnServer(s -> cost.stream().allMatch(c -> Materials.count(player(s).getInventory(), c.getItem()) == 0));
+			check(emptied, "materials were not taken from the inventory");
+			boolean refused = server.computeOnServer(s ->
+					ModelPlacer.placeWithMaterials(s.overworld(), player(s), TestModels.DEMO, d.offset(8, 0, 0), 0).model().isEmpty());
+			check(refused, "placement without materials must be refused");
+			UUID modelD = server.computeOnServer(s -> PlacedModels.get(s.overworld()).all().stream()
+					.filter(m -> m.anchor().equals(d)).findFirst().orElseThrow().id());
+			server.runOnServer(s -> ModelPlacer.dismantle(s.overworld(), modelD, player(s)));
+			ctx.waitTicks(5);
+			for (ItemStack c : cost) {
+				int dropped = server.computeOnServer(s -> s.overworld().getEntitiesOfClass(ItemEntity.class,
+						new AABB(d).inflate(4), e -> e.getItem().is(c.getItem())).stream().mapToInt(e -> e.getItem().getCount()).sum());
+				check(dropped == c.getCount(), "dropped " + dropped + " " + c.getItem() + ", expected " + c.getCount());
+			}
+			System.out.println("[SolidDisplays test] OK materials taken on place and dropped on dismantle: " + cost);
 		}
 	}
 
@@ -221,6 +264,25 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 		check(max - min < 1e-9, what + ": jitter " + (max - min));
 		check(onGround, what + ": not on ground");
 		System.out.println("[SolidDisplays test] OK " + what + " y=" + min);
+	}
+
+	/** Spawns a motionless item above (x, z) in model space and returns where it settles. */
+	private static double dropItemAndGetY(ClientGameTestContext ctx, TestServerContext server, BlockPos anchor, double x, double z) {
+		int id = server.computeOnServer(s -> {
+			ItemEntity item = new ItemEntity(s.overworld(), anchor.getX() + x, anchor.getY() + 2.5, anchor.getZ() + z,
+					new ItemStack(Items.STICK));
+			item.setDeltaMovement(Vec3.ZERO);
+			item.setPickUpDelay(32767);
+			s.overworld().addFreshEntity(item);
+			return item.getId();
+		});
+		ctx.waitTicks(40);
+		return server.computeOnServer(s -> {
+			Entity item = s.overworld().getEntity(id);
+			double y = item.getY();
+			item.discard();
+			return y;
+		});
 	}
 
 	private static void teleport(TestServerContext server, BlockPos anchor, double x, double y, double z, float yaw) {
