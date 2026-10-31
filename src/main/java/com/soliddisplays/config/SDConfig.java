@@ -39,6 +39,8 @@ public final class SDConfig {
 	public double maxPlaceDistance = 8.0;
 	/** Maximum number of placed models per player (0 = unlimited). */
 	public int maxModelsPerPlayer = 0;
+	/** If true, only the player who placed a model (or an operator) may dismantle it. */
+	public boolean onlyOwnerCanDismantle = true;
 
 	// ---- Material formula ----------------------------------------------
 	// amount(block) = max(minPerBlockType, ceil(totalVolume(block) * volumeMultiplier))
