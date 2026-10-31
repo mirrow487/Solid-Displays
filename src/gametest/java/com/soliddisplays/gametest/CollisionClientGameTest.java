@@ -47,6 +47,11 @@ public class CollisionClientGameTest implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext ctx) {
+		// SD_ONLY=<ClassName> runs a single test class (handy while iterating).
+		String only = System.getenv("SD_ONLY");
+		if (only != null && !only.equals(getClass().getSimpleName())) {
+			return;
+		}
 		singleplayer(ctx);
 		dedicatedServer(ctx);
 	}

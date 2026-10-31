@@ -23,6 +23,20 @@ ve malzemeleriyle dünyaya **gerçek kolizyonlu** olarak yerleştir.
 
 Çıktı: `build/libs/solid_displays-<sürüm>.jar`. Bu dosyayı ve Fabric API'yi `.minecraft/mods` klasörüne koy.
 
+## Tasarım Masası
+
+Masaya sağ tıkla:
+
+- **Sol panel:** blok/eşya arama ve seçme (tıkla → yeni parça), parça listesi, Kopyala / Sil / Geri / İleri.
+- **Orta:** 3D önizleme. Sol tık parçayı seçer; okları (Taşı) veya yüz tutamaklarını (Boyut) sürükle.
+  Boş yerde sürükle: döndür · Shift+sürükle veya orta tuş: kaydır · tekerlek: yakınlaştır.
+  Üstte ızgara adımı (1, 1/2, 1/4, 1/8, 1/16), Taşı/Boyut modu ve Ortala.
+- **Parça sekmesi:** konum/boyut/döndürme sayı alanları, hızlı 90° döndürme, kolizyon aç/kapat, toplam malzeme.
+- **Kaydet sekmesi:** model adı, Boş Blueprint slotu ve envanter, "Blueprint olarak kaydet".
+
+Kısayollar: Ctrl+Z / Ctrl+Y, Ctrl+D (kopyala), Delete, G (Taşı), S (Boyut).
+Yarım kalan tasarım masada saklanır. Sunucu her kaydı doğrular (limitler, izinli bloklar, açık masa).
+
 ## Nasıl çalışır (kolizyon)
 
 Her parça bir vanilla **Block/Item Display** ile görünür. Kolizyonu açık her parça için ayrıca
@@ -51,7 +65,7 @@ dosyasında tutulur. Yüklenmemiş chunk'taki parçalar, chunk yüklenince otoma
 Ekransız bir Linux sunucuda çalıştırmak için (yazılımsal OpenGL):
 
 ```bash
-LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGameTest
+LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGameTest
 ```
 
 ## Tarifler
