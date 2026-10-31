@@ -11,7 +11,7 @@
   "tooltip.solid_displays.test_model": "Places a fixed test model. Survival: costs materials (returned when dismantled). Creative: free.",
   "entity.solid_displays.model_collider": "Model Part",
   "message.solid_displays.place.blocked": "Something is in the way: a player or mob would be trapped inside the model.",
-  "message.solid_displays.dismantle.confirm": "Sneak + right-click again within 3 seconds to dismantle this model.",
+  "message.solid_displays.dismantle.confirm": "Dismantle \"%s\"? Click again within 3 seconds to confirm.",
   "message.solid_displays.dismantle.done": "Model dismantled.",
   "message.solid_displays.dismantle.not_owner": "Only the player who placed this model (or an operator) can dismantle it.",
   "message.solid_displays.place.missing": "Missing materials: %s",
@@ -66,5 +66,16 @@
   "message.solid_displays.save.empty": "Add at least one part first",
   "message.solid_displays.save.no_blueprint": "Put an Empty Blueprint into the slot first",
   "message.solid_displays.save.done": "Blueprint saved: %s",
-  "gui.solid_displays.rotation.quick": "Rotate 90° around the %s axis"
+  "gui.solid_displays.rotation.quick": "Rotate 90° around the %s axis",
+  "item.solid_displays.dismantle_tool": "Dismantle Tool",
+  "tooltip.solid_displays.dismantle_tool": "Right-click a placed model twice to take it apart and get its materials back.",
+  "tooltip.solid_displays.blueprint.rotation": "Rotation: %s°",
+  "tooltip.solid_displays.blueprint.materials": "Materials (you have):",
+  "tooltip.solid_displays.blueprint.free": "Creative mode: placing is free",
+  "tooltip.solid_displays.blueprint.usage": "Right-click a block to place · %s or Shift+scroll to rotate",
+  "key.solid_displays.rotate": "Rotate blueprint",
+  "key.category.solid_displays.main": "Solid Displays",
+  "message.solid_displays.place.too_far": "Too far away to place the model here.",
+  "message.solid_displays.place.limit": "You already placed the maximum number of models (%s).",
+  "message.solid_displays.unnamed": "unnamed model"
 }
