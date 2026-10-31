@@ -23,6 +23,20 @@ ve malzemeleriyle dünyaya **gerçek kolizyonlu** olarak yerleştir.
 
 Çıktı: `build/libs/solid_displays-<sürüm>.jar`. Bu dosyayı ve Fabric API'yi `.minecraft/mods` klasörüne koy.
 
+## Tasarım Masası
+
+Masaya sağ tıkla:
+
+- **Sol panel:** blok/eşya arama ve seçme (tıkla → yeni parça), parça listesi, Kopyala / Sil / Geri / İleri.
+- **Orta:** 3D önizleme. Sol tık parçayı seçer; okları (Taşı) veya yüz tutamaklarını (Boyut) sürükle.
+  Boş yerde sürükle: döndür · Shift+sürükle veya orta tuş: kaydır · tekerlek: yakınlaştır.
+  Üstte ızgara adımı (1, 1/2, 1/4, 1/8, 1/16), Taşı/Boyut modu ve Ortala.
+- **Parça sekmesi:** konum/boyut/döndürme sayı alanları, hızlı 90° döndürme, kolizyon aç/kapat, toplam malzeme.
+- **Kaydet sekmesi:** model adı, Boş Blueprint slotu ve envanter, "Blueprint olarak kaydet".
+
+Kısayollar: Ctrl+Z / Ctrl+Y, Ctrl+D (kopyala), Delete, G (Taşı), S (Boyut).
+Yarım kalan tasarım masada saklanır. Sunucu her kaydı doğrular (limitler, izinli bloklar, açık masa).
+
 ## Nasıl çalışır (kolizyon)
 
 Her parça bir vanilla **Block/Item Display** ile görünür. Kolizyonu açık her parça için ayrıca
@@ -30,7 +44,12 @@ görünmez bir `solid_displays:model_collider` entity'si oluşturulur. Bu entity
 mekanizmasını (`canBeCollidedWith`) kullanır, bu yüzden istemci ve sunucu aynı kutuyu hesaplar:
 titreme yok, multiplayer'da ekstra paket yok. Kutunun X/Y/Z boyutu senkronize veri olarak taşınır.
 Oyun entity aramalarını sınırlı bir payla yaptığı için 3 bloktan büyük parçalar birden çok kutuya bölünür.
-Döndürülmüş parçalarda eksene hizalı en küçük çevreleyen kutu kullanılır.
+90°'nin katı olmayan açılarla döndürülmüş parçalar, şekli takip eden küçük kutulardan oluşan bir
+"merdiven" ile sarılır (ızgara adımı `rotatedCollisionStep`, varsayılan 1/8 blok; parça başına en fazla
+`maxCollidersPerRotatedPart` kutu, gerekirse ızgara kabalaşır).
+
+Survival'da yerleştirme malzeme harcar; söküldüğünde aynı malzemeler modelin yerine düşer.
+Yaratıcı modda yerleştirme bedavadır ve söküm bir şey düşürmez.
 
 Parçalar ortak bir model ID'si taşır; modeller dünyaya bağlı `data/solid_displays_models.dat`
 dosyasında tutulur. Yüklenmemiş chunk'taki parçalar, chunk yüklenince otomatik temizlenir.
@@ -46,7 +65,7 @@ dosyasında tutulur. Yüklenmemiş chunk'taki parçalar, chunk yüklenince otoma
 Ekransız bir Linux sunucuda çalıştırmak için (yazılımsal OpenGL):
 
 ```bash
-LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1280x720x24" ./gradlew runClientGameTest
+LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1920x1080x24" ./gradlew runClientGameTest
 ```
 
 ## Tarifler
