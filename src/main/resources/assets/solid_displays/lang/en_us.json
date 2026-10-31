@@ -9,10 +9,11 @@
   "tooltip.solid_displays.blueprint.no_design": "No design yet. Fill it at a Design Table.",
   "tooltip.solid_displays.blueprint.parts": "Parts: %s",
   "item.solid_displays.test_model": "Test Model (debug)",
-  "tooltip.solid_displays.test_model": "Creative only: places a fixed test model for free.",
+  "tooltip.solid_displays.test_model": "Places a fixed test model. Survival: costs materials (returned when dismantled). Creative: free.",
   "entity.solid_displays.model_collider": "Model Part",
   "message.solid_displays.place.blocked": "Something is in the way: a player or mob would be trapped inside the model.",
   "message.solid_displays.dismantle.confirm": "Sneak + right-click again within 3 seconds to dismantle this model.",
   "message.solid_displays.dismantle.done": "Model dismantled.",
-  "message.solid_displays.dismantle.not_owner": "Only the player who placed this model (or an operator) can dismantle it."
+  "message.solid_displays.dismantle.not_owner": "Only the player who placed this model (or an operator) can dismantle it.",
+  "message.solid_displays.place.missing": "Missing materials: %s"
 }
