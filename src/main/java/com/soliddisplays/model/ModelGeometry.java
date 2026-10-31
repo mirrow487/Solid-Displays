@@ -97,6 +97,135 @@ public final class ModelGeometry {
 	}
 
 	/**
+	 * Collision boxes for one element, relative to the anchor's minimum corner.
+	 * <p>
+	 * If the element ends up axis-aligned (all rotations multiples of 90°) its
+	 * exact box is returned. Otherwise the rotated box is approximated by a
+	 * "staircase" of axis-aligned boxes: the enclosing box is cut into a grid of
+	 * {@code step}-sized cells, every cell whose centre lies inside the rotated
+	 * box is kept, and neighbouring cells are greedily merged into larger boxes.
+	 * If that needs more than {@code maxBoxes} boxes the grid is made coarser;
+	 * as a last resort the enclosing box is used.
+	 */
+	public static List<AABB> collisionBoxes(ModelElement e, int quarterTurns, double step, int maxBoxes) {
+		AABB bounds = rotatedBounds(e, quarterTurns);
+		if (isAxisAligned(e)) {
+			return List.of(bounds);
+		}
+		// Never coarser than half the thinnest side, or thin rotated plates would vanish.
+		Vector3fc size = e.size();
+		double minSide = Math.min(size.x(), Math.min(size.y(), size.z()));
+		double s = Math.max(1.0 / 64.0, Math.min(step, minSide / 2.0));
+		Quaternionf inverse = totalRotation(e, quarterTurns).conjugate();
+		Vector3f center = rotatedCenter(e, quarterTurns);
+		Vector3f half = new Vector3f(size).mul(0.5f);
+
+		for (int attempt = 0; attempt < 4; attempt++, s *= 2) {
+			int nx = (int) Math.ceil(bounds.getXsize() / s - 1e-6);
+			int ny = (int) Math.ceil(bounds.getYsize() / s - 1e-6);
+			int nz = (int) Math.ceil(bounds.getZsize() / s - 1e-6);
+			if ((long) nx * ny * nz > 262_144) {
+				continue; // grid too fine for this element; try coarser
+			}
+			boolean[][][] filled = new boolean[nx][ny][nz];
+			boolean any = false;
+			Vector3f p = new Vector3f();
+			for (int x = 0; x < nx; x++) {
+				for (int y = 0; y < ny; y++) {
+					for (int z = 0; z < nz; z++) {
+						p.set((float) (bounds.minX + (x + 0.5) * s - center.x),
+								(float) (bounds.minY + (y + 0.5) * s - center.y),
+								(float) (bounds.minZ + (z + 0.5) * s - center.z));
+						inverse.transform(p);
+						if (Math.abs(p.x) <= half.x + 1e-4 && Math.abs(p.y) <= half.y + 1e-4 && Math.abs(p.z) <= half.z + 1e-4) {
+							filled[x][y][z] = true;
+							any = true;
+						}
+					}
+				}
+			}
+			if (!any) {
+				break;
+			}
+			List<AABB> boxes = greedyMerge(filled, nx, ny, nz, bounds, s, bounds.maxX, bounds.maxY, bounds.maxZ);
+			if (boxes.size() <= maxBoxes) {
+				return boxes;
+			}
+		}
+		return List.of(bounds);
+	}
+
+	/** True if the element's own rotation is a multiple of 90° on every axis. */
+	public static boolean isAxisAligned(ModelElement e) {
+		Vector3fc r = e.rotation();
+		return isRightAngle(r.x()) && isRightAngle(r.y()) && isRightAngle(r.z());
+	}
+
+	private static boolean isRightAngle(float degrees) {
+		double m = Math.abs(degrees % 90.0);
+		return m < 1e-3 || 90.0 - m < 1e-3;
+	}
+
+	/**
+	 * Classic 3D greedy meshing: grow a box along X, then Z, then Y while every
+	 * cell is filled and unused. Cell edges at the far end are clamped to the
+	 * real bounds so the result never sticks out of the enclosing box.
+	 */
+	private static List<AABB> greedyMerge(boolean[][][] filled, int nx, int ny, int nz, AABB origin, double s,
+			double maxX, double maxY, double maxZ) {
+		boolean[][][] used = new boolean[nx][ny][nz];
+		List<AABB> out = new ArrayList<>();
+		for (int y = 0; y < ny; y++) {
+			for (int z = 0; z < nz; z++) {
+				for (int x = 0; x < nx; x++) {
+					if (!filled[x][y][z] || used[x][y][z]) {
+						continue;
+					}
+					int x2 = x;
+					while (x2 + 1 < nx && filled[x2 + 1][y][z] && !used[x2 + 1][y][z]) {
+						x2++;
+					}
+					int z2 = z;
+					grow:
+					while (z2 + 1 < nz) {
+						for (int i = x; i <= x2; i++) {
+							if (!filled[i][y][z2 + 1] || used[i][y][z2 + 1]) {
+								break grow;
+							}
+						}
+						z2++;
+					}
+					int y2 = y;
+					growY:
+					while (y2 + 1 < ny) {
+						for (int i = x; i <= x2; i++) {
+							for (int k = z; k <= z2; k++) {
+								if (!filled[i][y2 + 1][k] || used[i][y2 + 1][k]) {
+									break growY;
+								}
+							}
+						}
+						y2++;
+					}
+					for (int i = x; i <= x2; i++) {
+						for (int j = y; j <= y2; j++) {
+							for (int k = z; k <= z2; k++) {
+								used[i][j][k] = true;
+							}
+						}
+					}
+					out.add(new AABB(
+							origin.minX + x * s, origin.minY + y * s, origin.minZ + z * s,
+							Math.min(maxX, origin.minX + (x2 + 1) * s),
+							Math.min(maxY, origin.minY + (y2 + 1) * s),
+							Math.min(maxZ, origin.minZ + (z2 + 1) * s)));
+				}
+			}
+		}
+		return out;
+	}
+
+	/**
 	 * Splits a box into equal pieces no larger than {@code maxPiece} on any
 	 * axis. Pieces share faces exactly, so walking across seams is smooth.
 	 */

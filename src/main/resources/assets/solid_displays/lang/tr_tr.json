@@ -9,10 +9,11 @@
   "tooltip.solid_displays.blueprint.no_design": "Henüz tasarım yok. Tasarım Masası'nda doldur.",
   "tooltip.solid_displays.blueprint.parts": "Parça sayısı: %s",
   "item.solid_displays.test_model": "Test Modeli (hata ayıklama)",
-  "tooltip.solid_displays.test_model": "Sadece yaratıcı mod: sabit bir test modelini bedava yerleştirir.",
+  "tooltip.solid_displays.test_model": "Sabit bir test modeli yerleştirir. Survival: malzeme harcar (sökünce geri düşer). Yaratıcı: bedava.",
   "entity.solid_displays.model_collider": "Model Parçası",
   "message.solid_displays.place.blocked": "Yol kapalı: bir oyuncu veya mob modelin içinde sıkışırdı.",
   "message.solid_displays.dismantle.confirm": "Bu modeli sökmek için 3 saniye içinde tekrar Shift + sağ tık yap.",
   "message.solid_displays.dismantle.done": "Model söküldü.",
-  "message.solid_displays.dismantle.not_owner": "Bu modeli sadece yerleştiren oyuncu (veya operatör) sökebilir."
+  "message.solid_displays.dismantle.not_owner": "Bu modeli sadece yerleştiren oyuncu (veya operatör) sökebilir.",
+  "message.solid_displays.place.missing": "Eksik malzeme: %s"
 }

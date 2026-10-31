@@ -5,6 +5,7 @@ import com.soliddisplays.SolidDisplays;
 import com.soliddisplays.config.SDConfig;
 import com.soliddisplays.entity.ModelColliderEntity;
 import com.soliddisplays.model.ElementKind;
+import com.soliddisplays.model.MaterialCalculator;
 import com.soliddisplays.model.ModelData;
 import com.soliddisplays.model.ModelElement;
 import com.soliddisplays.model.ModelGeometry;
@@ -76,8 +77,61 @@ public final class ModelPlacer {
 		}
 	}
 
-	/** One collider piece in world space. */
-	private record Piece(AABB box, boolean solid) {
+	/** One collider piece. */
+	public record Piece(AABB box, boolean solid) {
+	}
+
+	/**
+	 * Every collider piece of a model, relative to the anchor's minimum corner.
+	 * Solid parts follow their (possibly rotated) shape; non-solid parts only
+	 * need one clickable box, so they use the enclosing box.
+	 */
+	public static List<Piece> colliderPieces(ModelData model, int quarterTurns) {
+		SDConfig config = SDConfig.get();
+		List<Piece> pieces = new ArrayList<>();
+		for (ModelElement element : model.elements()) {
+			List<AABB> shape = element.collision()
+					? ModelGeometry.collisionBoxes(element, quarterTurns, config.rotatedCollisionStep, config.maxCollidersPerRotatedPart)
+					: List.of(ModelGeometry.rotatedBounds(element, quarterTurns));
+			for (AABB box : shape) {
+				for (AABB piece : ModelGeometry.split(box, ModelColliderEntity.MAX_PIECE_SIZE)) {
+					pieces.add(new Piece(piece, element.collision()));
+				}
+			}
+		}
+		return pieces;
+	}
+
+	/**
+	 * Places a model paid for with the player's materials. Creative players
+	 * place for free (and get nothing back). Materials are only taken once the
+	 * model has actually been placed.
+	 */
+	public static PlaceResult placeWithMaterials(ServerLevel level, ServerPlayer player, ModelData model,
+			BlockPos anchor, int quarterTurns) {
+		boolean free = player.hasInfiniteMaterials() || !SDConfig.get().requireMaterials;
+		List<ItemStack> cost = free ? List.of() : MaterialCalculator.cost(model);
+		List<ItemStack> missing = Materials.missing(player.getInventory(), cost);
+		if (!missing.isEmpty()) {
+			return PlaceResult.fail(Component.translatable("message.solid_displays.place.missing", describe(missing)));
+		}
+		PlaceResult result = place(level, player, model, anchor, quarterTurns, Materials.toStacks(cost));
+		if (result.model().isPresent()) {
+			Materials.take(player.getInventory(), cost);
+		}
+		return result;
+	}
+
+	/** "3× Stone Bricks, 1× Diamond" */
+	public static Component describe(List<ItemStack> items) {
+		net.minecraft.network.chat.MutableComponent out = Component.empty();
+		for (int i = 0; i < items.size(); i++) {
+			if (i > 0) {
+				out.append(", ");
+			}
+			out.append(items.get(i).getCount() + "× ").append(items.get(i).getHoverName());
+		}
+		return out;
 	}
 
 	/**
@@ -93,11 +147,8 @@ public final class ModelPlacer {
 
 		// 1. Work out every collider piece first, so we can refuse cleanly.
 		List<Piece> pieces = new ArrayList<>();
-		for (ModelElement element : model.elements()) {
-			AABB bounds = ModelGeometry.rotatedBounds(element, quarterTurns).move(base);
-			for (AABB box : ModelGeometry.split(bounds, ModelColliderEntity.MAX_PIECE_SIZE)) {
-				pieces.add(new Piece(box, element.collision()));
-			}
+		for (Piece piece : colliderPieces(model, quarterTurns)) {
+			pieces.add(new Piece(piece.box().move(base), piece.solid()));
 		}
 
 		// 2. Never trap a player or mob inside a solid part.
@@ -224,8 +275,7 @@ public final class ModelPlacer {
 	}
 
 	/**
-	 * Removes every entity of a model and hands the refund to {@code player}
-	 * (or drops it at the anchor if there is no player / the inventory is full).
+	 * Removes every entity of a model and drops its refund at the anchor.
 	 * Entities in unloaded chunks are removed later by {@link #onEntityLoad}.
 	 */
 	public static void dismantle(ServerLevel level, UUID modelId, ServerPlayer player) {
@@ -239,14 +289,11 @@ public final class ModelPlacer {
 				entity.discard();
 			}
 		}
-		for (ItemStack stack : model.refund()) {
-			ItemStack copy = stack.copy();
-			if (player == null || !player.getInventory().add(copy)) {
-				Vec3 at = player != null ? player.position() : Vec3.atCenterOf(model.anchor());
-				net.minecraft.world.Containers.dropItemStack(level, at.x, at.y, at.z, copy);
-			}
-		}
+		// The materials pop out where the model stood, like a broken block.
 		Vec3 at = Vec3.atCenterOf(model.anchor());
+		for (ItemStack stack : model.refund()) {
+			net.minecraft.world.Containers.dropItemStack(level, at.x, at.y, at.z, stack.copy());
+		}
 		level.playSound(null, at.x, at.y, at.z, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 0.8f);
 		if (player != null) {
 			player.sendOverlayMessage(Component.translatable("message.solid_displays.dismantle.done")
