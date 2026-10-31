@@ -23,6 +23,7 @@ public class SolidDisplaysClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.MODEL_COLLIDER, NoopRenderer::new);
 		// Holding a blueprint: rotate key, material tooltip, ghost preview.
 		BlueprintClient.init();
+		ClientLimits.init();
 		GhostRenderer.init();
 	}
 }

@@ -110,10 +110,10 @@ public class DesignerClientGameTest implements FabricClientGameTest {
 			// --- save into the blueprint slot
 			server.runOnServer(s -> table(s, table).getBlueprintSlot().setItem(0, new ItemStack(ModItems.EMPTY_BLUEPRINT)));
 			ctx.waitTicks(5);
-			clickButtonContaining(ctx, "Kaydet", "Save");
+			clickButtonContaining(ctx, "Blueprint", "Blueprint");
 			ctx.waitTicks(3);
 			ctx.takeScreenshot("stage3_designer_save_tab");
-			clickButtonContaining(ctx, "Blueprint olarak kaydet", "Save as Blueprint");
+			clickButtonContaining(ctx, "Kaydet", "Save");
 			ctx.waitTicks(10);
 			ModelData saved = server.computeOnServer(s -> BlueprintItem.getModel(table(s, table).getBlueprintSlot().getItem(0)));
 			boolean isFilled = server.computeOnServer(s -> table(s, table).getBlueprintSlot().getItem(0).is(ModItems.BLUEPRINT));
@@ -173,13 +173,13 @@ public class DesignerClientGameTest implements FabricClientGameTest {
 
 	// ---- helpers ------------------------------------------------------------
 
-	private static void openTable(ClientGameTestContext ctx, TestServerContext server, BlockPos pos) {
+	static void openTable(ClientGameTestContext ctx, TestServerContext server, BlockPos pos) {
 		server.runOnServer(s -> player(s).openMenu(table(s, pos)));
 		ctx.waitForScreen(DesignTableScreen.class);
 		ctx.waitTicks(5);
 	}
 
-	private static DesignTableBlockEntity table(MinecraftServer s, BlockPos pos) {
+	static DesignTableBlockEntity table(MinecraftServer s, BlockPos pos) {
 		return (DesignTableBlockEntity) s.overworld().getBlockEntity(pos);
 	}
 
@@ -199,7 +199,7 @@ public class DesignerClientGameTest implements FabricClientGameTest {
 		return screen(mc).editorState();
 	}
 
-	private static EditorState state(ClientGameTestContext ctx) {
+	static EditorState state(ClientGameTestContext ctx) {
 		return ctx.computeOnClient(DesignerClientGameTest::state);
 	}
 
@@ -207,7 +207,7 @@ public class DesignerClientGameTest implements FabricClientGameTest {
 		return ctx.computeOnClient(mc -> mc.getWindow().getGuiScale());
 	}
 
-	private static void click(ClientGameTestContext ctx, float guiX, float guiY) {
+	static void click(ClientGameTestContext ctx, float guiX, float guiY) {
 		double s = guiScale(ctx);
 		ctx.getInput().setCursorPos(guiX * s, guiY * s);
 		ctx.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
@@ -254,7 +254,7 @@ public class DesignerClientGameTest implements FabricClientGameTest {
 		ctx.waitTicks(2);
 	}
 
-	private static void clickButtonContaining(ClientGameTestContext ctx, String tr, String en) {
+	static void clickButtonContaining(ClientGameTestContext ctx, String tr, String en) {
 		Vector2f p = ctx.computeOnClient(mc -> {
 			for (var child : mc.gui.screen().children()) {
 				if (child instanceof net.minecraft.client.gui.components.Button b && b.visible) {
