@@ -37,6 +37,15 @@ Masaya sağ tıkla:
 Kısayollar: Ctrl+Z / Ctrl+Y, Ctrl+D (kopyala), Delete, G (Taşı), S (Boyut).
 Yarım kalan tasarım masada saklanır. Sunucu her kaydı doğrular (limitler, izinli bloklar, açık masa).
 
+## Blueprint ile yerleştirme
+
+- Dolu blueprint'in tooltip'i: model adı, döndürme, gereken malzemeler (yeşil ✔ yeterli / kırmızı ✘ eksik, parantez içinde envanterdeki miktar).
+- Elde tutarken bakılan yerde modelin yarı saydam **hayaleti** görünür (malzeme eksikse kırmızımsı).
+- **R** (Kontroller'den değiştirilebilir) veya **Shift + tekerlek**: 90° döndür.
+- **Sağ tık**: malzemeler envanterden harcanır, model yerleşir; blueprint harcanmaz. Eksikse liste sohbete yazılır.
+- **Söküm:** modele Shift + sağ tık veya **Söküm Aleti** ile sağ tık → 3 saniye içinde tekrar tıkla → model silinir, malzemeler yere düşer.
+  Varsayılan olarak sadece yerleştiren oyuncu (veya operatör) sökebilir.
+
 ## Nasıl çalışır (kolizyon)
 
 Her parça bir vanilla **Block/Item Display** ile görünür. Kolizyonu açık her parça için ayrıca
@@ -72,6 +81,7 @@ LIBGL_ALWAYS_SOFTWARE=1 SDL_VIDEO_FORCE_EGL=1 xvfb-run -a -s "-screen 0 1920x108
 
 - **Tasarım Masası**: `cam panel, kâğıt, cam panel` / `tahta, çalışma masası, tahta` / `tahta, boş, tahta`
 - **Boş Blueprint ×8**: 8 kâğıt + ortada mavi boya
+- **Söküm Aleti**: `demir, boş, demir` / `boş, çubuk, boş` / `boş, çubuk, boş`
 
 ## Config
 

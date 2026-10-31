@@ -6,6 +6,7 @@ import com.soliddisplays.config.SDConfig;
 import com.soliddisplays.entity.ModelColliderEntity;
 import com.soliddisplays.model.ElementKind;
 import com.soliddisplays.model.MaterialCalculator;
+import com.soliddisplays.model.ModelValidator;
 import com.soliddisplays.model.ModelData;
 import com.soliddisplays.model.ModelElement;
 import com.soliddisplays.model.ModelGeometry;
@@ -109,7 +110,22 @@ public final class ModelPlacer {
 	 */
 	public static PlaceResult placeWithMaterials(ServerLevel level, ServerPlayer player, ModelData model,
 			BlockPos anchor, int quarterTurns) {
-		boolean free = player.hasInfiniteMaterials() || !SDConfig.get().requireMaterials;
+		SDConfig config = SDConfig.get();
+		// A blueprint's data can be forged (e.g. creative item editing): validate again here.
+		Optional<Component> invalid = ModelValidator.validate(model);
+		if (invalid.isPresent()) {
+			return PlaceResult.fail(invalid.get());
+		}
+		if (model.isEmpty()) {
+			return PlaceResult.fail(Component.translatable("message.solid_displays.save.empty"));
+		}
+		if (player.position().distanceTo(Vec3.atCenterOf(anchor)) > config.maxPlaceDistance + 1.0) {
+			return PlaceResult.fail(Component.translatable("message.solid_displays.place.too_far"));
+		}
+		if (config.maxModelsPerPlayer > 0 && PlacedModels.get(level).countOwnedBy(player.getUUID()) >= config.maxModelsPerPlayer) {
+			return PlaceResult.fail(Component.translatable("message.solid_displays.place.limit", config.maxModelsPerPlayer));
+		}
+		boolean free = player.hasInfiniteMaterials() || !config.requireMaterials;
 		List<ItemStack> cost = free ? List.of() : MaterialCalculator.cost(model);
 		List<ItemStack> missing = Materials.missing(player.getInventory(), cost);
 		if (!missing.isEmpty()) {
@@ -259,7 +275,8 @@ public final class ModelPlacer {
 		PendingDismantle pending = PENDING.get(player.getUUID());
 		if (pending == null || !pending.modelId().equals(modelId) || now - pending.time() > CONFIRM_TICKS) {
 			PENDING.put(player.getUUID(), new PendingDismantle(modelId, now));
-			player.sendOverlayMessage(Component.translatable("message.solid_displays.dismantle.confirm")
+			Component name = model.name().isBlank() ? Component.translatable("message.solid_displays.unnamed") : Component.literal(model.name());
+			player.sendOverlayMessage(Component.translatable("message.solid_displays.dismantle.confirm", name)
 					.withStyle(ChatFormatting.YELLOW));
 			return;
 		}

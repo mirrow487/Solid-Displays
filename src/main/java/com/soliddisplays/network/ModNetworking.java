@@ -4,6 +4,7 @@ import com.soliddisplays.block.DesignTableBlockEntity;
 import com.soliddisplays.menu.DesignTableMenu;
 import com.soliddisplays.model.ModelData;
 import com.soliddisplays.model.ModelValidator;
+import com.soliddisplays.placement.BlueprintPlacement;
 import com.soliddisplays.registry.ModComponents;
 import com.soliddisplays.registry.ModItems;
 import java.util.Optional;
@@ -32,11 +33,19 @@ public final class ModNetworking {
 	public static void init() {
 		PayloadTypeRegistry.serverboundPlay().registerLarge(SaveBlueprintPayload.TYPE, SaveBlueprintPayload.CODEC, MAX_DESIGN_PACKET);
 		PayloadTypeRegistry.serverboundPlay().registerLarge(UpdateDraftPayload.TYPE, UpdateDraftPayload.CODEC, MAX_DESIGN_PACKET);
+		PayloadTypeRegistry.serverboundPlay().register(RotateBlueprintPayload.TYPE, RotateBlueprintPayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(SaveBlueprintPayload.TYPE,
 				(payload, context) -> saveBlueprint(context.player(), payload.pos(), payload.model()));
 		ServerPlayNetworking.registerGlobalReceiver(UpdateDraftPayload.TYPE,
 				(payload, context) -> updateDraft(context.player(), payload.pos(), payload.model()));
+		ServerPlayNetworking.registerGlobalReceiver(RotateBlueprintPayload.TYPE, (payload, context) -> {
+			ItemStack held = context.player().getMainHandItem();
+			// Only ever ±1 per key press / scroll notch; clamp anything else.
+			if (BlueprintPlacement.isFilledBlueprint(held)) {
+				BlueprintPlacement.rotate(held, Integer.signum(payload.steps()));
+			}
+		});
 	}
 
 	/** The table the player is currently using, if it is the one at {@code pos}. */
