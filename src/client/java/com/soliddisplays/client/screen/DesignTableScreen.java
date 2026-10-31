@@ -76,15 +76,24 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 	private static final int POS_Y = 46;
 	private static final int ROW_STEP = 28;
 
-	// ---- colours ----
+	// ---- colours: neutral dark grey editor theme ----
 	private static final int BG = 0xFF1B1D22;
 	private static final int PANEL = 0xFF25282F;
 	private static final int PANEL_LIGHT = 0xFF30343C;
+	private static final int TOOLBAR = PANEL_LIGHT;
+	private static final int WELL = 0xFF1F2227;
+	private static final int WELL_BORDER = 0xFF1F2227;
+	private static final int SLOT_BG = 0xFF1F2227;
 	private static final int VIEW_BG = 0xFF14161A;
+	private static final int VIEW_TEXT = 0xFF9AA0A6;
 	private static final int TEXT = 0xFFE6E6E6;
 	private static final int TEXT_DIM = 0xFF9AA0A6;
 	private static final int ACCENT = 0xFFFFD24A;
+	private static final int ACCENT_TEXT = ACCENT;
+	private static final int OK = 0xFF46A758;
+	private static final int ERROR = 0xFFE5484D;
 	private static final int[] AXIS_COLORS = {0xFFE5484D, 0xFF46A758, 0xFF3E8EE8};
+	private static final int[] AXIS_LABEL_COLORS = AXIS_COLORS;
 	private static final int HOVER = 0xFFFFFFFF;
 
 	private enum Tab { PART, SAVE }
@@ -278,8 +287,13 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 		nameBox.setValue(state.name());
 		nameBox.setResponder(state::setName);
 		saveTabWidgets.add(addRenderableWidget(nameBox));
+		int half = (rightW - 10) / 2;
 		saveTabWidgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.solid_displays.save"), b -> save())
-				.bounds(rightX + 4, 54, rightW - 8, 18).build()));
+				.bounds(rightX + 4, 54, half, 18)
+				.tooltip(Tooltip.create(Component.translatable("gui.solid_displays.save.tip"))).build()));
+		saveTabWidgets.add(addRenderableWidget(Button.builder(Component.translatable("gui.solid_displays.load"), b -> loadFromBlueprint())
+				.bounds(rightX + 6 + half, 54, half, 18)
+				.tooltip(Tooltip.create(Component.translatable("gui.solid_displays.load.tip"))).build()));
 
 		// The inventory panel (Save tab) floats over the bottom-right corner of the viewport.
 		leftPos = width - INV_W - 4;
@@ -505,7 +519,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 		g.fill(0, 0, width, height, BG);
 		g.fill(0, 0, leftW, height, PANEL);
 		g.fill(rightX, 0, width, height, PANEL);
-		g.fill(viewX0, 0, viewX1, TOOLBAR_H, PANEL_LIGHT);
+		g.fill(viewX0, 0, viewX1, TOOLBAR_H, TOOLBAR);
 		g.fill(viewX0, viewY0, viewX1, viewY1, VIEW_BG);
 
 		extractViewport(g);
@@ -529,12 +543,13 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 				camera.view(), gizmo, Math.min(radius, 16), viewX0, viewY0, viewX1, viewY1, g.scissorStack.peek()));
 		if (state.size() == 0) {
 			g.textWithWordWrap(font, Component.translatable("gui.solid_displays.empty_hint"),
-					viewX0 + 6, viewY0 + 8, viewX1 - viewX0 - 12, TEXT_DIM, false);
+					viewX0 + 6, viewY0 + 8, viewX1 - viewX0 - 12, VIEW_TEXT, false);
 		}
 	}
 
 	private void extractPicker(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-		g.fill(3, pickerY - 1, 5 + pickerCols * CELL, pickerY + pickerRows * CELL + 1, 0xFF1F2227);
+		g.fill(3, pickerY - 1, 5 + pickerCols * CELL, pickerY + pickerRows * CELL + 1, WELL_BORDER);
+		g.fill(4, pickerY, 4 + pickerCols * CELL, pickerY + pickerRows * CELL, WELL);
 		int hovered = pickerIndexAt(mouseX, mouseY);
 		for (int row = 0; row < pickerRows; row++) {
 			for (int col = 0; col < pickerCols; col++) {
@@ -564,7 +579,8 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 
 	private void extractPartList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
 		int rows = listRows();
-		g.fill(3, listY0 - 1, leftW - 3, listY0 + rows * ROW_H + 1, 0xFF1F2227);
+		g.fill(3, listY0 - 1, leftW - 3, listY0 + rows * ROW_H + 1, WELL_BORDER);
+		g.fill(4, listY0, leftW - 4, listY0 + rows * ROW_H, WELL);
 		int hovered = listIndexAt(mouseX, mouseY);
 		List<ModelElement> elements = state.elements();
 		for (int r = 0; r < rows; r++) {
@@ -585,7 +601,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 			g.text(font, font.plainSubstrByWidth(label, leftW - 40), 24, y + 5, TEXT, false);
 			// small square: filled = collision on
 			int cx = leftW - 12;
-			g.fill(cx, y + 6, cx + 6, y + 12, e.collision() ? 0xFF46A758 : 0xFF5A5F66);
+			g.fill(cx, y + 6, cx + 6, y + 12, e.collision() ? OK : 0xFF5A5F66);
 		}
 	}
 
@@ -593,13 +609,13 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 		ModelElement e = state.selected();
 		Component title = e == null ? Component.translatable("gui.solid_displays.no_selection")
 				: iconOf(e).getHoverName();
-		g.text(font, Language.getInstance().getVisualOrder(font.substrByWidth(title, rightW - 8)), rightX + 4, 24, e == null ? TEXT_DIM : ACCENT, false);
+		g.text(font, Language.getInstance().getVisualOrder(font.substrByWidth(title, rightW - 8)), rightX + 4, 24, e == null ? TEXT_DIM : ACCENT_TEXT, false);
 		String[] labels = {"gui.solid_displays.position", "gui.solid_displays.size", "gui.solid_displays.rotation"};
 		for (int row = 0; row < 3; row++) {
 			int fy = POS_Y + row * ROW_STEP;
 			g.text(font, Component.translatable(labels[row]), rightX + 4, fy - 10, TEXT_DIM, false);
 			for (int axis = 0; axis < 3; axis++) {
-				g.text(font, "XYZ".substring(axis, axis + 1), rightX + 5 + axis * (fieldW + 10), fy + 3, AXIS_COLORS[axis], false);
+				g.text(font, "XYZ".substring(axis, axis + 1), rightX + 5 + axis * (fieldW + 10), fy + 3, AXIS_LABEL_COLORS[axis], false);
 			}
 		}
 
@@ -626,12 +642,13 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 		g.textWithWordWrap(font, status, rightX + 4, 76, rightW - 8, statusColor, false);
 		// Slot backgrounds for the blueprint slot and inventory, above the 3D view.
 		g.nextStratum();
-		g.fill(leftPos - 1, topPos - 1, leftPos + imageWidth + 1, topPos + imageHeight + 1, 0xFF000000);
+		g.fill(leftPos - 1, topPos - 1, leftPos + imageWidth + 1, topPos + imageHeight + 1, WELL_BORDER);
 		g.fill(leftPos, topPos, leftPos + imageWidth, topPos + imageHeight, PANEL_LIGHT);
 		for (Slot slot : menu.slots) {
 			int x = leftPos + slot.x;
 			int y = topPos + slot.y;
-			g.fill(x - 1, y - 1, x + 17, y + 17, 0xFF1F2227);
+			g.fill(x - 1, y - 1, x + 17, y + 17, SLOT_BG);
+			g.fill(x, y, x + 16, y + 16, 0xFF2C3037);
 		}
 		ItemStack bp = menu.getBlueprint();
 		Component slotHint = bp.isEmpty() ? Component.translatable("gui.solid_displays.slot.empty")
@@ -642,7 +659,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 
 		if (awaitingSave && bp.is(ModItems.BLUEPRINT) && BlueprintItem.getModel(bp).equals(saveRequest())) {
 			awaitingSave = false;
-			setStatus(Component.translatable("gui.solid_displays.status.saved"), 0xFF46A758);
+			setStatus(Component.translatable("gui.solid_displays.status.saved"), OK);
 		}
 	}
 
@@ -917,7 +934,7 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 		if (picked >= 0 && button == InputConstants.MOUSE_BUTTON_LEFT) {
 			PickerEntry entry = filtered.get(picked);
 			if (state.size() >= SDConfig.get().maxElements) {
-				setStatus(Component.translatable("message.solid_displays.invalid.too_many", SDConfig.get().maxElements), 0xFFE5484D);
+				setStatus(Component.translatable("message.solid_displays.invalid.too_many", SDConfig.get().maxElements), ERROR);
 				return true;
 			}
 			state.add(entry.kind(), entry.id());
@@ -1084,22 +1101,38 @@ public class DesignTableScreen extends AbstractContainerScreen<DesignTableMenu> 
 	private void save() {
 		ModelData model = saveRequest();
 		if (model.isEmpty()) {
-			setStatus(Component.translatable("message.solid_displays.save.empty"), 0xFFE5484D);
+			setStatus(Component.translatable("message.solid_displays.save.empty"), ERROR);
 			return;
 		}
 		Optional<Component> error = ModelValidator.validate(model);
 		if (error.isPresent()) {
-			setStatus(error.get(), 0xFFE5484D);
+			setStatus(error.get(), ERROR);
 			return;
 		}
 		ItemStack bp = menu.getBlueprint();
 		if (!bp.is(ModItems.EMPTY_BLUEPRINT) && !bp.is(ModItems.BLUEPRINT)) {
-			setStatus(Component.translatable("message.solid_displays.save.no_blueprint"), 0xFFE5484D);
+			setStatus(Component.translatable("message.solid_displays.save.no_blueprint"), ERROR);
 			return;
 		}
 		ClientPlayNetworking.send(new SaveBlueprintPayload(menu.getTablePos(), model));
 		awaitingSave = true;
 		setStatus(Component.translatable("gui.solid_displays.status.saving"), TEXT_DIM);
+	}
+
+	/** Loads the design of the filled blueprint in the slot into the editor (undoable). */
+	private void loadFromBlueprint() {
+		ItemStack bp = menu.getBlueprint();
+		ModelData model = BlueprintItem.getModel(bp);
+		if (!bp.is(ModItems.BLUEPRINT) || model.isEmpty()) {
+			setStatus(Component.translatable("gui.solid_displays.status.nothing_to_load"), ERROR);
+			return;
+		}
+		state.load(model);
+		nameBox.setValue(model.name());
+		syncFields();
+		clampListScroll();
+		frameModel();
+		setStatus(Component.translatable("gui.solid_displays.status.loaded", model.name()), OK);
 	}
 
 	private void setStatus(Component message, int color) {
