@@ -1,6 +1,7 @@
 package com.soliddisplays.entity;
 
 import com.soliddisplays.placement.ModelPlacer;
+import com.soliddisplays.registry.ModItems;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
@@ -210,10 +211,14 @@ public class ModelColliderEntity extends Entity {
 
 	// ---- Interaction -------------------------------------------------------
 
-	/** Sneak + right click starts (and confirms) dismantling the whole model. */
+	/**
+	 * Sneak + right click, or right click with the Dismantle Tool, starts (and
+	 * on the second click confirms) dismantling the whole model.
+	 */
 	@Override
 	public InteractionResult interact(Player player, InteractionHand hand, Vec3 location) {
-		if (hand != InteractionHand.MAIN_HAND || !player.isSecondaryUseActive()) {
+		boolean tool = player.getItemInHand(hand).is(ModItems.DISMANTLE_TOOL);
+		if (hand != InteractionHand.MAIN_HAND || !(tool || player.isSecondaryUseActive())) {
 			return InteractionResult.PASS;
 		}
 		if (player instanceof ServerPlayer serverPlayer && level() instanceof ServerLevel serverLevel) {

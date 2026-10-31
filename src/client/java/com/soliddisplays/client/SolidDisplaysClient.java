@@ -1,5 +1,7 @@
 package com.soliddisplays.client;
 
+import com.soliddisplays.client.blueprint.BlueprintClient;
+import com.soliddisplays.client.blueprint.GhostRenderer;
 import com.soliddisplays.client.render.DesignViewRenderer;
 import com.soliddisplays.client.screen.DesignTableScreen;
 import com.soliddisplays.registry.ModEntities;
@@ -19,5 +21,8 @@ public class SolidDisplaysClient implements ClientModInitializer {
 		PictureInPictureRendererRegistry.register(context -> new DesignViewRenderer(context.minecraft()));
 		// Colliders are invisible; their box still shows with F3+B.
 		EntityRendererRegistry.register(ModEntities.MODEL_COLLIDER, NoopRenderer::new);
+		// Holding a blueprint: rotate key, material tooltip, ghost preview.
+		BlueprintClient.init();
+		GhostRenderer.init();
 	}
 }
